@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Custom Markdown To Html Converter</title>
+</head>
+
+<body>
+    <div><span style="font-weight: bold;">Custom Markdown Converter</span></div>
+    <div class="converter-body">
+
+        <div id='src-div'>
+            <span>Source</span>
+            <textarea name="src" id="src" cols="80" rows="30"></textarea>
+        </div>
+        <div id='btn-div'>
+            <button id="convert" onclick="convert()">Convert > </button>
+        </div>
+        <div id='rslt-div'>
+            <span>Result</span>
+            <textarea name="result" id="result" cols="80" rows="30"></textarea>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    function convert() {
+        const src = document.getElementById('src').value
+        console.log(src)
+        const formattedSrc = src.split("\n").map(x => x.trim()).filter(Boolean)
+        console.log(src)
+        const result = formattedSrc.map(txt => {
+            const firstChar = txt[0]
+            let index
+            switch (firstChar) {
+                case '>':
+                    index = txt.indexOf(" ")
+                    return `<em>${txt.slice(index+1)}</em>`
+                    break;
+                case '#':
+                    index = txt.indexOf(" ")
+                    return `<h${index}>${txt.slice(index+1)}</h${index}>`
+                    break;
+                case '-':
+                    if (txt[1] === '-' && txt[2] === '-')
+                        return `<h1><br></h1><hr><h1><br></h1>`
+                    else
+                        return `<p>${txt}</p>`
+                    break;
+                default:
+                    return `<p>${txt}</p>`
+                    break;
+            }
+        }).map(htmlTxt => {
+            const indexes = []
+            for (let i = 0; i < htmlTxt.length - 2; i++) {
+                if (htmlTxt[i] === '~' &&
+                    htmlTxt[i + 1] === '~' &&
+                    htmlTxt[i + 2] === '~') {
+                    indexes.push(i)
+                }
+            }
+            indexes.length > 0 && console.log(`indexes:${indexes}`)
+            const todo = []
+            for (let j = 0; j < indexes.length; j += 2) {
+                const target = htmlTxt.slice(indexes[j] + 3, indexes[j + 1])
+                todo.push(target)
+                    //htmlTxt = htmlTxt.replace(`~~~${target}~~~`, `<span style="color: rgb(87, 160, 130); font-weight: bold;">${target}</span>`)
+            }
+            for (let i = 0; i < todo.length; i++) {
+                const target = todo[i]
+                htmlTxt = htmlTxt.replace(`~~~${target}~~~`, `<span style="color: rgb(87, 160, 130); font-weight: bold;">${target}</span>`)
+            }
+
+
+
+            return htmlTxt
+        })
+
+
+
+        console.log(result.join("\n"))
+        document.getElementById('result').value = result.join('\n')
+            //console.log(document.getElementById('result').value)
+    }
+</script>
+<style>
+    .converter-body {
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        display: -webkit-flex;
+        align-items: center;
+        -webkit-justify-content: center;
+        right: 0;
+    }
+    
+    .converter-body div {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+</html>
